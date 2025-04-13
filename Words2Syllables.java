@@ -28,7 +28,7 @@ public class Words2Syllables {
       Map<String, Integer> sorted = sortByValue(sylls);
 
       
-      File syllableFile = new File("syllables.txt");
+      File syllableFile = new File("syllables.csv");
       if (syllableFile.exists()) {
         syllableFile.delete();
       }
@@ -51,7 +51,7 @@ public class Words2Syllables {
 
   static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
       HashMap<String, Integer> temp = hm.entrySet().stream().sorted((i1, i2)-> 
-          i1.getValue().compareTo(i2.getValue())).collect(
+          i2.getValue().compareTo(i1.getValue())).collect(
           Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue,
           (e1, e2) -> e1, LinkedHashMap::new));
 
