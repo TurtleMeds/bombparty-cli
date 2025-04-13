@@ -1,6 +1,8 @@
 import java.io.File;
 import java.util.*;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 
@@ -25,8 +27,22 @@ public class Words2Syllables {
       wordScanner.close();
       Map<String, Integer> sorted = sortByValue(sylls);
 
-      for (Map.Entry<String, Integer> e : sorted.entrySet())
-          System.out.println("Word: " + e.getKey() + "\tOcurrences: " + e.getValue());
+      
+      File syllableFile = new File("syllables.txt");
+      if (syllableFile.exists()) {
+        syllableFile.delete();
+      }
+      try {
+        syllableFile.createNewFile();
+        FileWriter syllableWriter = new FileWriter(syllableFile);
+        for (Map.Entry<String, Integer> e : sorted.entrySet())
+            syllableWriter.append(e.getValue() + "," + e.getKey() + "\n");
+        syllableWriter.close();
+      } catch (IOException e) {
+        System.out.println("error while creating/writing to file: ");
+        e.printStackTrace();
+      }
+
     } catch (FileNotFoundException e) {
       System.out.println("an error occured");
       e.printStackTrace();

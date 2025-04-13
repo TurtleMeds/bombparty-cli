@@ -1,1 +1,5 @@
 /target
+*.class
+words_2_syllables
+words_2_syllables.rs
+
