@@ -1,31 +1,102 @@
-use rand::Rng;
-use std::collections::HashMap;
+use colored::Colorize;
+use crossterm::style::Stylize;
+use crossterm::{self, QueueableCommand};
+use rand::seq::IndexedRandom;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
+use std::{cmp, str};
 
 struct Syllable {
     syll: String,
     count: i32,
 }
 
+#[derive(Debug)]
+struct Letter {
+    letter: char,
+    count: i32,
+}
+
 fn main() -> io::Result<()> {
-    let mut rng = rand::rng();
-    let words = parse_words("full.txt");
+    println!("Parsing words...");
+    let words = parse_words("full.txt").expect("Error while parsing words!");
     println!("Done parsing words.");
-    let syllables = parse_syllables("syllables.csv");
+    println!("Parsing syllables...");
+    let syllables = parse_syllables("syllables.csv").expect("Error while parsing syllables!");
     println!("Done parsing syllables.");
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+    let mut alphabet_board: Vec<Letter> = Vec::new();
+    for char in alphabet.chars().into_iter() {
+        alphabet_board.push(Letter {
+            letter: (char),
+            count: (1),
+        });
+    }
+    let wpp = 500;
+    let mut lives = 3;
     let mut cur_guess: String = String::new();
-    // loop {
-    //     println!("an");
-    //     io::stdin()
-    //         .read_line(&mut cur_guess)
-    //         .expect("Failed to read line!");
-    //     if cur_guess.trim().to_string() == "antidisestablishmentarianism" {
-    //         println!("you got it!");
-    //         break;
-    //     }
-    // }
+    loop {
+        let cur_syllable = choose_syllable(wpp, &syllables);
+        println!("{syllable}", syllable = cur_syllable.syll);
+        io::stdin()
+            .read_line(&mut cur_guess)
+            .expect("Failed to read line!");
+        cur_guess = cur_guess.trim().to_lowercase();
+        if words.contains(&cur_guess) && cur_guess.contains(&cur_syllable.syll) {
+            println!("you got it!");
+            for char in cur_guess.chars() {
+                for letter in &mut alphabet_board {
+                    if char == letter.letter {
+                        letter.count = cmp::max(letter.count - 1, 0);
+                    }
+                }
+            }
+            print_alphabet(&alphabet_board);
+        } else {
+            lives -= 1;
+            println!("KABOOM! you lost a life. now at {lives} lives.");
+        }
+        if lives <= 0 {
+            break;
+        }
+        cur_guess.clear();
+    }
     Ok(())
+}
+
+fn print_alphabet(alphabet_board: &Vec<Letter>) {
+    let mut to_print = String::new();
+    for letter in alphabet_board {
+        to_print.push_str(
+            format!(
+                "{char}",
+                char = {
+                    if letter.count == 0 {
+                        letter.letter.on_black()
+                    } else {
+                        letter.letter.on_red()
+                    }
+                }
+            )
+            .as_str(),
+        );
+    }
+    println!("{to_print}");
+}
+
+fn choose_syllable(wpp: i32, syllables: &Vec<Syllable>) -> &Syllable {
+    let mut syllable = random_syllable(syllables);
+    while syllable.count < wpp {
+        syllable = random_syllable(&syllables);
+    }
+    syllable
+}
+
+fn random_syllable(syllables: &Vec<Syllable>) -> &Syllable {
+    let mut rng = rand::rng();
+    syllables
+        .choose(&mut rng)
+        .expect("Error while choosing random syllable!")
 }
 
 fn parse_words(file_path: &str) -> io::Result<Vec<String>> {
@@ -39,6 +110,7 @@ fn parse_words(file_path: &str) -> io::Result<Vec<String>> {
                 .expect("failed to strip suffix while parsing word: {cur_word}")
                 .to_string(),
         );
+        cur_word.clear();
     }
     Ok(words)
 }
