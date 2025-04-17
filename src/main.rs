@@ -20,13 +20,14 @@ struct Letter {
 fn main() -> io::Result<()> {
     println!("Parsing words...");
     let words = parse_words("full.txt").expect("Error while parsing words!");
+    let mut used_words: Vec<String> = Vec::new();
     println!("Done parsing words.");
     println!("Parsing syllables...");
     let syllables = parse_syllables("syllables.csv").expect("Error while parsing syllables!");
     println!("Done parsing syllables.");
-    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+    const ALPHABET: &str = "abcdefghijklmnopqrstuvwxyz";
     let mut alphabet_board: Vec<Letter> = Vec::new();
-    for char in alphabet.chars().into_iter() {
+    for char in ALPHABET.chars().into_iter() {
         alphabet_board.push(Letter {
             letter: (char),
             count: (1),
@@ -42,15 +43,10 @@ fn main() -> io::Result<()> {
             .read_line(&mut cur_guess)
             .expect("Failed to read line!");
         cur_guess = cur_guess.trim().to_lowercase();
-        if words.contains(&cur_guess) && cur_guess.contains(&cur_syllable.syll) {
+        if is_guess_valid(&cur_guess, &cur_syllable, &used_words, &words) {
             println!("you got it!");
-            for char in cur_guess.chars() {
-                for letter in &mut alphabet_board {
-                    if char == letter.letter {
-                        letter.count = cmp::max(letter.count - 1, 0);
-                    }
-                }
-            }
+            used_words.push(cur_guess.to_string());
+            update_alphabet(&mut alphabet_board, &cur_guess);
             print_alphabet(&alphabet_board);
         } else {
             lives -= 1;
@@ -62,6 +58,25 @@ fn main() -> io::Result<()> {
         cur_guess.clear();
     }
     Ok(())
+}
+
+fn is_guess_valid(
+    guess: &String,
+    syllable: &Syllable,
+    used_words: &Vec<String>,
+    words: &Vec<String>,
+) -> bool {
+    words.contains(&guess) && guess.contains(&syllable.syll) && !used_words.contains(&guess)
+}
+
+fn update_alphabet(alphabet_board: &mut Vec<Letter>, guess: &String) {
+    for char in guess.chars() {
+        for letter in &mut *alphabet_board {
+            if char == letter.letter {
+                letter.count = cmp::max(letter.count - 1, 0);
+            }
+        }
+    }
 }
 
 fn print_alphabet(alphabet_board: &Vec<Letter>) {
