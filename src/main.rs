@@ -27,12 +27,7 @@ fn main() -> io::Result<()> {
     println!("Done parsing syllables.");
     const ALPHABET: &str = "abcdefghijklmnopqrstuvwxyz";
     let mut alphabet_board: Vec<Letter> = Vec::new();
-    for char in ALPHABET.chars().into_iter() {
-        alphabet_board.push(Letter {
-            letter: (char),
-            count: (1),
-        });
-    }
+    alphabet_generate(&mut alphabet_board, ALPHABET);
     let wpp = 500;
     let mut lives = 3;
     let mut cur_guess: String = String::new();
@@ -48,6 +43,10 @@ fn main() -> io::Result<()> {
             used_words.push(cur_guess.to_string());
             update_alphabet(&mut alphabet_board, &cur_guess);
             print_alphabet(&alphabet_board);
+            if alphabet_empty(&mut alphabet_board) {
+                lives += 1;
+                alphabet_generate(&mut alphabet_board, &ALPHABET);
+            }
         } else {
             lives -= 1;
             println!("KABOOM! you lost a life. now at {lives} lives.");
@@ -58,6 +57,25 @@ fn main() -> io::Result<()> {
         cur_guess.clear();
     }
     Ok(())
+}
+
+fn alphabet_generate(alphabet_board: &mut Vec<Letter>, alphabet: &str) {
+    for char in alphabet.chars().into_iter() {
+        alphabet_board.push(Letter {
+            letter: (char),
+            count: (1),
+        });
+    }
+}
+
+fn alphabet_empty(alphabet_board: &mut Vec<Letter>) -> bool {
+    let mut empty = true;
+    for letter in alphabet_board {
+        if letter.count != 0 {
+            empty = false;
+        }
+    }
+    empty
 }
 
 fn is_guess_valid(

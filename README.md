@@ -2,7 +2,7 @@
 This project aims to implement all features of bombparty from Sparklin Labs / https://jklm.fun (or soon https://croco.games).
 
 ## Roadmap:
-- [x] Obtain a full dictionary (this is done, however it is not the official one. it is a combination of the english_450k dict from - [monkeytypegame/monkeytype](https://github.com/monkeytypegame/monkeytype) and all of the dictionaries in - [NachozQ/BombParty-Lists](https://github.com/NachozQ/BombParty-Lists))
+- [x] Obtain a full dictionary (this is done, however it is not the official one. it is a combination of the english_450k dict from [monkeytypegame/monkeytype](https://github.com/monkeytypegame/monkeytype) and all of the dictionaries in [NachozQ/BombParty-Lists](https://github.com/NachozQ/BombParty-Lists))
 - [x] Parse words into syllables
 - [ ] Main game:
   - [x] Show syllable prompt
